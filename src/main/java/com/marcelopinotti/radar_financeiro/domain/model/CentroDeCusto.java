@@ -1,0 +1,42 @@
+package com.marcelopinotti.radar_financeiro.domain.model;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
+
+@Entity
+@Table(name = "centro_de_custo")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CentroDeCusto {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idCentroDeCusto")
+    private long id;
+    @Column(nullable = false)
+    private String descricao;
+    @Column(columnDefinition = "TEXT")
+    private String observacao;
+
+    @ManyToOne
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private Usuario usuario;
+
+    @ManyToMany(mappedBy = "centro_de_custo")
+    @JsonBackReference // evitar referência cíclica na serialização JSON
+    private List<Titulo> titulos;
+}
