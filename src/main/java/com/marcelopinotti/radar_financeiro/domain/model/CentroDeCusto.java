@@ -36,7 +36,7 @@ public class CentroDeCusto {
     @JoinColumn(name = "id_usuario", nullable = false)
     private Usuario usuario;
 
-    @ManyToMany(mappedBy = "centro_de_custo")
+    @ManyToMany(mappedBy = "centroDeCusto")
     @JsonBackReference // evitar referência cíclica na serialização JSON
     private List<Titulo> titulos;
 }
