@@ -8,7 +8,7 @@ import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioRequestDTO;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,8 +24,8 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
     @Autowired
     private ModelMapper mapper;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+//    @Autowired
+//    private PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -79,10 +79,8 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
         if (emailJaExiste) {
             throw new ResourceBadRequestException("Email já cadastrado");
         }
-        usuario.setEmail(emailNormalizado);
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+//        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 
 
     }
 }
-
