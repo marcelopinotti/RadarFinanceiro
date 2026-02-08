@@ -12,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -32,6 +34,13 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
     public UsuarioResponseDTO criar(UsuarioRequestDTO dto) {
         Usuario usuario = mapper.map(dto, Usuario.class);
         validarCadastro(usuario);
+        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(dto.getEmail());
+        if (optUsuario.isPresent()) {
+            throw new ResourceBadRequestException("Já existe um usuário cadastrado com o email: " + dto.getEmail());
+        }
+        if (usuario.getDataCadastro() == null) {
+            usuario.setDataCadastro(new Date());
+        }
         return mapper.map(usuarioRepository.save(usuario), UsuarioResponseDTO.class);
     }
 
@@ -52,16 +61,24 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
 
     @Override
     public UsuarioResponseDTO atualizar(long id, UsuarioRequestDTO dto) {
-        buscarPorId(id);
-        Usuario usuario = mapper.map(dto, Usuario.class);
-        usuario.setId(id);
-        return mapper.map(usuarioRepository.save(usuario), UsuarioResponseDTO.class);
+        Usuario usuarioBanco = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+
+        usuarioBanco.setNome(dto.getNome());
+        usuarioBanco.setEmail(dto.getEmail().toLowerCase());
+        usuarioBanco.setSenha(dto.getSenha());
+        usuarioBanco.setCelular(dto.getCelular());
+
+        validarCadastro(usuarioBanco);
+        return mapper.map(usuarioRepository.save(usuarioBanco), UsuarioResponseDTO.class);
     }
 
     @Override
     public void deletar(long id) {
-        buscarPorId(id);
-        usuarioRepository.deleteById(id);
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+        usuario.setDataInativacao(new Date());
+        usuarioRepository.save(usuario);
     }
 
     private void validarCadastro(Usuario usuario) {
@@ -74,11 +91,6 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
             throw new ResourceBadRequestException("Campos obrigatórios ausentes: " + String.join(", ", faltantes));
         }
 
-        String emailNormalizado = usuario.getEmail().toLowerCase();
-        boolean emailJaExiste = !usuarioRepository.findByEmail(emailNormalizado).isEmpty();
-        if (emailJaExiste) {
-            throw new ResourceBadRequestException("Email já cadastrado");
-        }
 //        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 
 

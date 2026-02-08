@@ -14,6 +14,7 @@ public class UsuarioResponseDTO {
     private String nome;
     private String email;
     private String celular;
+    private Date dataCadastro;
     private Date dataInativacao;
 
 
