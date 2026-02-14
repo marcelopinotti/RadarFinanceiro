@@ -8,6 +8,7 @@ import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioRequestDTO;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +29,7 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
 
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private BCryptPasswordEncoder passwordEncoder;
 
 
     @Override
@@ -65,6 +66,8 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
         Usuario usuarioBanco = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
 
+        String senha = passwordEncoder.encode(dto.getSenha());
+        usuarioBanco.setSenha(senha);
         usuarioBanco.setNome(dto.getNome());
         usuarioBanco.setEmail(dto.getEmail().toLowerCase());
         usuarioBanco.setSenha(dto.getSenha());
@@ -92,8 +95,8 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
             throw new ResourceBadRequestException("Campos obrigatórios ausentes: " + String.join(", ", faltantes));
         }
 
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-
+        String senha = passwordEncoder.encode(usuario.getSenha());
+        usuario.setSenha(senha);
 
     }
 
