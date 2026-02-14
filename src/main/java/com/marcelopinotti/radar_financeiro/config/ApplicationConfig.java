@@ -3,11 +3,18 @@ package com.marcelopinotti.radar_financeiro.config;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class ApplicationConfig {
-    @Bean // bean é uma anotação que indica que esse método retorna um objeto que deve ser gerenciado pelo Spring
+    @Bean
     public ModelMapper mapper() {
         return new ModelMapper();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

@@ -8,14 +8,14 @@ import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioRequestDTO;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioResponseDTO> {
@@ -26,8 +26,9 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
     @Autowired
     private ModelMapper mapper;
 
-//    @Autowired
-//    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -49,7 +50,7 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios.stream()
                 .map(usuario -> mapper.map(usuario, UsuarioResponseDTO.class))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -91,8 +92,14 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
             throw new ResourceBadRequestException("Campos obrigatórios ausentes: " + String.join(", ", faltantes));
         }
 
-//        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
 
 
+    }
+
+    public UsuarioResponseDTO buscarPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .map(usuario -> mapper.map(usuario, UsuarioResponseDTO.class))
+                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com email: " + email));
     }
 }
