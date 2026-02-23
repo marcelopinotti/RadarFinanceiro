@@ -26,7 +26,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 
     private final JwtUtil jwtUtil;
-    private ModelMapper mapper;
+
+
+    private UserDetailsSecurityServer userDetailsSecurityServer;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
         super();
@@ -54,7 +56,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         Usuario usuario = (Usuario) authResult.getPrincipal();
         String token = jwtUtil.gerarToken(authResult);
-        UsuarioResponseDTO usuarioResponse = mapper.map(usuario, UsuarioResponseDTO.class);
+        UsuarioResponseDTO usuarioResponse = new UsuarioResponseDTO();
+        usuarioResponse.setId(usuario.getId());
+        usuarioResponse.setNome(usuario.getNome());
+        usuarioResponse.setEmail(usuario.getEmail());
+        usuarioResponse.setCelular(usuario.getCelular());
+        usuarioResponse.setDataCadastro(usuario.getDataCadastro());
+        usuarioResponse.setDataInativacao(usuario.getDataInativacao());
 
         LoginResponseDTO loginResponse = new LoginResponseDTO();
         loginResponse.setToken("Bearer " + token);
