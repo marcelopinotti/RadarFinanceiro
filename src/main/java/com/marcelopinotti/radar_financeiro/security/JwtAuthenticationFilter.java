@@ -10,7 +10,6 @@ import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
@@ -41,7 +40,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
             LoginRequestDTO login = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDTO.class);
-            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.getEmail(), login.getSenha());
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(login.email(), login.senha());
             return authenticationManager.authenticate(authToken);
 
 
@@ -56,17 +55,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
         Usuario usuario = (Usuario) authResult.getPrincipal();
         String token = jwtUtil.gerarToken(authResult);
-        UsuarioResponseDTO usuarioResponse = new UsuarioResponseDTO();
-        usuarioResponse.setId(usuario.getId());
-        usuarioResponse.setNome(usuario.getNome());
-        usuarioResponse.setEmail(usuario.getEmail());
-        usuarioResponse.setCelular(usuario.getCelular());
-        usuarioResponse.setDataCadastro(usuario.getDataCadastro());
-        usuarioResponse.setDataInativacao(usuario.getDataInativacao());
 
-        LoginResponseDTO loginResponse = new LoginResponseDTO();
-        loginResponse.setToken("Bearer " + token);
-        loginResponse.setUsuario(usuarioResponse);
+        UsuarioResponseDTO usuarioResponse = new UsuarioResponseDTO(
+            usuario.getId(),
+            usuario.getNome(),
+            usuario.getEmail(),
+            usuario.getCelular(),
+            usuario.getDataCadastro(),
+            usuario.getDataInativacao()
+        );
+
+        LoginResponseDTO loginResponse = new LoginResponseDTO("Bearer " + token, usuarioResponse);
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType("application/json");

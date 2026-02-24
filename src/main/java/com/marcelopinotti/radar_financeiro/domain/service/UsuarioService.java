@@ -6,10 +6,8 @@ import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import com.marcelopinotti.radar_financeiro.domain.repository.UsuarioRepository;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioRequestDTO;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
-import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,39 +23,35 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
     private UsuarioRepository usuarioRepository;
 
     @Autowired
-    private ModelMapper mapper;
-
-
-    @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
 
     @Override
     public UsuarioResponseDTO criar(UsuarioRequestDTO dto) {
-        Usuario usuario = mapper.map(dto, Usuario.class);
+        Usuario usuario = toEntity(dto);
         validarCadastro(usuario);
-        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(dto.getEmail());
+        Optional<Usuario> optUsuario = usuarioRepository.findByEmail(dto.email());
         if (optUsuario.isPresent()) {
-            throw new ResourceBadRequestException("Já existe um usuário cadastrado com o email: " + dto.getEmail());
+            throw new ResourceBadRequestException("Já existe um usuário cadastrado com o email: " + dto.email());
         }
         if (usuario.getDataCadastro() == null) {
             usuario.setDataCadastro(new Date());
         }
-        return mapper.map(usuarioRepository.save(usuario), UsuarioResponseDTO.class);
+        return toResponseDTO(usuarioRepository.save(usuario));
     }
 
     @Override
     public List<UsuarioResponseDTO> obterTodos() {
         List<Usuario> usuarios = usuarioRepository.findAll();
         return usuarios.stream()
-                .map(usuario -> mapper.map(usuario, UsuarioResponseDTO.class))
+                .map(this::toResponseDTO)
                 .toList();
     }
 
     @Override
     public UsuarioResponseDTO buscarPorId(long id) {
         return usuarioRepository.findById(id)
-                .map(usuario -> mapper.map(usuario, UsuarioResponseDTO.class))
+                .map(this::toResponseDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
     }
 
@@ -66,15 +60,14 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
         Usuario usuarioBanco = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
 
-        String senha = passwordEncoder.encode(dto.getSenha());
+        String senha = passwordEncoder.encode(dto.senha());
         usuarioBanco.setSenha(senha);
-        usuarioBanco.setNome(dto.getNome());
-        usuarioBanco.setEmail(dto.getEmail().toLowerCase());
-        usuarioBanco.setSenha(dto.getSenha());
-        usuarioBanco.setCelular(dto.getCelular());
+        usuarioBanco.setNome(dto.nome());
+        usuarioBanco.setEmail(dto.email().toLowerCase());
+        usuarioBanco.setCelular(dto.celular());
 
         validarCadastro(usuarioBanco);
-        return mapper.map(usuarioRepository.save(usuarioBanco), UsuarioResponseDTO.class);
+        return toResponseDTO(usuarioRepository.save(usuarioBanco));
     }
 
     @Override
@@ -97,12 +90,32 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
 
         String senha = passwordEncoder.encode(usuario.getSenha());
         usuario.setSenha(senha);
-
     }
 
     public UsuarioResponseDTO buscarPorEmail(String email) {
         return usuarioRepository.findByEmail(email)
-                .map(usuario -> mapper.map(usuario, UsuarioResponseDTO.class))
+                .map(this::toResponseDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com email: " + email));
+    }
+
+    // Métodos de conversão (substitui o ModelMapper)
+    private Usuario toEntity(UsuarioRequestDTO dto) {
+        Usuario usuario = new Usuario();
+        usuario.setNome(dto.nome());
+        usuario.setEmail(dto.email());
+        usuario.setSenha(dto.senha());
+        usuario.setCelular(dto.celular());
+        return usuario;
+    }
+
+    private UsuarioResponseDTO toResponseDTO(Usuario usuario) {
+        return new UsuarioResponseDTO(
+            usuario.getId(),
+            usuario.getNome(),
+            usuario.getEmail(),
+            usuario.getCelular(),
+            usuario.getDataCadastro(),
+            usuario.getDataInativacao()
+        );
     }
 }
