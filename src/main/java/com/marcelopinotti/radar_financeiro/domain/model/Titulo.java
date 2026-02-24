@@ -1,5 +1,6 @@
 package com.marcelopinotti.radar_financeiro.domain.model;
 
+import com.marcelopinotti.radar_financeiro.domain.Enum.TipoTitulo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -33,6 +34,8 @@ public class Titulo {
 
     @Temporal(TemporalType.DATE)
     private Date dataPagamento;
+
+    private TipoTitulo tipo;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_usuario", nullable = false)
