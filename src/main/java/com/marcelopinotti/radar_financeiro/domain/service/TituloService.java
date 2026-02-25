@@ -4,7 +4,9 @@ import com.marcelopinotti.radar_financeiro.domain.exception.ResourceBadRequestEx
 import com.marcelopinotti.radar_financeiro.domain.model.CentroDeCusto;
 import com.marcelopinotti.radar_financeiro.domain.model.Titulo;
 import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
+import com.marcelopinotti.radar_financeiro.domain.repository.CentroDeCustoRepository;
 import com.marcelopinotti.radar_financeiro.domain.repository.TituloRepository;
+import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoRequestDto;
 import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoResponseDto;
 import com.marcelopinotti.radar_financeiro.dto.titulo.TituloRequestDto;
 import com.marcelopinotti.radar_financeiro.dto.titulo.TituloResponseDto;
@@ -12,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -19,6 +23,9 @@ public class TituloService implements CRUDService<TituloRequestDto, TituloRespon
 
     @Autowired
     private TituloRepository tituloRepository;
+
+    @Autowired
+    private CentroDeCustoRepository centroDeCustoRepository;
 
     @Override
     public List<TituloResponseDto> obterTodos() {
@@ -34,13 +41,26 @@ public class TituloService implements CRUDService<TituloRequestDto, TituloRespon
                 .map(this::toResponseDTO)
                 .orElseThrow(() -> new RuntimeException("Título não encontrado com id: " + id));
     }
-
-    @Override
+@Override
     public TituloResponseDto criar(TituloRequestDto dto) {
         validarTitulo(dto);
+
         Titulo titulo = toEntity(dto);
-        Usuario usuario = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Usuario usuario = (Usuario) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
         titulo.setUsuario(usuario);
+
+        if (dto.centroDeCusto() != null && !dto.centroDeCusto().isEmpty()) {
+            var ccIds = dto.centroDeCusto().stream()
+                    .map(CentroDeCustoRequestDto::id)
+                    .toList();
+            var centros = centroDeCustoRepository.findAllById(ccIds);
+            titulo.setCentroDeCusto(centros);
+        } else {titulo.setCentroDeCusto(new ArrayList<>());}
+
         return toResponseDTO(tituloRepository.save(titulo));
     }
 
@@ -89,5 +109,12 @@ public class TituloService implements CRUDService<TituloRequestDto, TituloRespon
                         .toList()
                     : null
         );
+    }
+
+    public List<TituloResponseDto> obterPorDataVencimento(Date periodoInicial, Date periodoFinal) {
+        List<Titulo> titulos = tituloRepository.obterPorDataVencimento(periodoInicial, periodoFinal);
+        return titulos.stream()
+                .map(this::toResponseDTO)
+                .toList();
     }
 }
