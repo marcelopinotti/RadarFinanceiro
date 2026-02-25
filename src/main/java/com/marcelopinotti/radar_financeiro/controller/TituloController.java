@@ -3,7 +3,7 @@ package com.marcelopinotti.radar_financeiro.controller;
 import com.marcelopinotti.radar_financeiro.domain.service.TituloService;
 import com.marcelopinotti.radar_financeiro.dto.titulo.TituloRequestDto;
 import com.marcelopinotti.radar_financeiro.dto.titulo.TituloResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,12 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/titulo")
 public class TituloController {
 
-    @Autowired
-    private TituloService tituloService;
+
+    private final TituloService tituloService;
 
     @GetMapping(value = "/obter")
     public ResponseEntity<List<TituloResponseDto>> obterTodos() {
@@ -48,7 +49,7 @@ public class TituloController {
     }
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<?> deletar(@PathVariable long id) {
+    public ResponseEntity<Void> deletar(@PathVariable long id) {
         tituloService.deletar(id);
         return ResponseEntity.noContent().build();
     }

@@ -2,7 +2,7 @@ package com.marcelopinotti.radar_financeiro.controller;
 
 import com.marcelopinotti.radar_financeiro.domain.service.DashboardService;
 import com.marcelopinotti.radar_financeiro.dto.dashboard.DashboardResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -14,11 +14,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Date;
 
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/dashboard")
 public class DashBoardController {
-    @Autowired
-    private DashboardService dashboardService;
+
+    private final DashboardService dashboardService;
 
     @GetMapping
     public ResponseEntity<DashboardResponseDto> obterDashboard(

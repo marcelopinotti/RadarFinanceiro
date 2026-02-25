@@ -5,17 +5,18 @@ import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import com.marcelopinotti.radar_financeiro.domain.repository.CentroDeCustoRepository;
 import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoRequestDto;
 import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class CentroDeCustoService implements CRUDService<CentroDeCustoRequestDto, CentroDeCustoResponseDto> {
 
-    @Autowired
-    private CentroDeCustoRepository centroDeCustoRepository;
+
+    private final CentroDeCustoRepository centroDeCustoRepository;
 
     @Override
     public CentroDeCustoResponseDto criar(CentroDeCustoRequestDto dto) {

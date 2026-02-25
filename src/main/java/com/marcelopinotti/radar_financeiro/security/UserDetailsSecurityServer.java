@@ -2,7 +2,7 @@ package com.marcelopinotti.radar_financeiro.security;
 
 import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import com.marcelopinotti.radar_financeiro.domain.repository.UsuarioRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -10,11 +10,12 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
+@RequiredArgsConstructor
 @Component
 public class UserDetailsSecurityServer implements UserDetailsService {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+
+    private final UsuarioRepository usuarioRepository;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

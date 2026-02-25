@@ -73,7 +73,7 @@ public class JwtUtil {
         String email = claims.getSubject();
         Date dataExpiracao = claims.getExpiration();
         Date dataAtual = new Date(System.currentTimeMillis());
-        return email != null && dataExpiracao != null && dataAtual.before(dataExpiracao) ? true : false;
+        return email != null && dataExpiracao != null && dataAtual.before(dataExpiracao);
     }
 
 

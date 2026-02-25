@@ -3,7 +3,7 @@ package com.marcelopinotti.radar_financeiro.controller;
 import com.marcelopinotti.radar_financeiro.domain.service.CentroDeCustoService;
 import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoRequestDto;
 import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,12 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/centro-de-custo")
 public class CentroDeCustoController {
 
-    @Autowired
-    private CentroDeCustoService centroDeCustoService;
+
+    private final CentroDeCustoService centroDeCustoService;
+
     @GetMapping(value = "/obter")
     public ResponseEntity<List<CentroDeCustoResponseDto>> obterTodos() {
         return ResponseEntity.ok(centroDeCustoService.obterTodos());
@@ -46,7 +48,7 @@ public class CentroDeCustoController {
     }
 
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<?> deletar(@PathVariable long id) {
+    public ResponseEntity<Void> deletar(@PathVariable long id) {
         centroDeCustoService.deletar(id);
         return ResponseEntity.noContent().build();
     }

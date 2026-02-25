@@ -1,6 +1,6 @@
 package com.marcelopinotti.radar_financeiro.security;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -9,22 +9,24 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    @Autowired
-    private JwtUtil jwtUtil;
 
-    @Autowired
-    private AuthenticationConfiguration authenticationconfiguration;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private UserDetailsSecurityServer userdetailssecurityserver;
+
+    private final AuthenticationConfiguration authenticationconfiguration;
+
+
+    private final UserDetailsSecurityServer userdetailssecurityserver;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder() {
@@ -41,7 +43,7 @@ public class WebSecurityConfig {
         AuthenticationManager authManager = authenticationconfiguration.getAuthenticationManager();
 
         http
-            .headers(headers -> headers.frameOptions(frame -> frame.disable()))
+            .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
             .cors(AbstractHttpConfigurer::disable)
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth

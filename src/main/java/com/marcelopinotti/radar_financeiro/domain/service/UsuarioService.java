@@ -6,7 +6,7 @@ import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import com.marcelopinotti.radar_financeiro.domain.repository.UsuarioRepository;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioRequestDTO;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,15 +15,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-
+@RequiredArgsConstructor
 @Service
 public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioResponseDTO> {
 
-    @Autowired
-    private UsuarioRepository usuarioRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     @Override
@@ -52,13 +50,13 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
     public UsuarioResponseDTO buscarPorId(long id) {
         return usuarioRepository.findById(id)
                 .map(this::toResponseDTO)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+                .orElseThrow(() -> usuarioNaoEncontrado(id));
     }
 
     @Override
     public UsuarioResponseDTO atualizar(long id, UsuarioRequestDTO dto) {
         Usuario usuarioBanco = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+                .orElseThrow(() -> usuarioNaoEncontrado(id));
 
         String senha = passwordEncoder.encode(dto.senha());
         usuarioBanco.setSenha(senha);
@@ -73,7 +71,7 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
     @Override
     public void deletar(long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado com id: " + id));
+                .orElseThrow(() -> usuarioNaoEncontrado(id));
         usuario.setDataInativacao(new Date());
         usuarioRepository.save(usuario);
     }
@@ -117,5 +115,9 @@ public class UsuarioService implements CRUDService<UsuarioRequestDTO, UsuarioRes
             usuario.getDataCadastro(),
             usuario.getDataInativacao()
         );
+    }
+
+    private ResourceNotFoundException usuarioNaoEncontrado(long id) {
+        return new ResourceNotFoundException("Usuário não encontrado com id: " + id);
     }
 }

@@ -3,7 +3,7 @@ package com.marcelopinotti.radar_financeiro.controller;
 import com.marcelopinotti.radar_financeiro.domain.service.UsuarioService;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioRequestDTO;
 import com.marcelopinotti.radar_financeiro.dto.usuario.UsuarioResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -19,12 +19,12 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    @Autowired
-    private UsuarioService usuarioService;
+    private final UsuarioService usuarioService;
 
     @GetMapping("/obter")
     public ResponseEntity<List<UsuarioResponseDTO>> obterTodos() {
@@ -46,7 +46,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.atualizar(id, dto));
     }
     @DeleteMapping("/deletar/{id}")
-    public ResponseEntity<?> deletar(@PathVariable long id) {
+    public ResponseEntity<Void> deletar(@PathVariable long id) {
         usuarioService.deletar(id);
         return ResponseEntity.noContent().build();
     }

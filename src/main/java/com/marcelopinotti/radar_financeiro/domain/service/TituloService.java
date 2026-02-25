@@ -1,7 +1,6 @@
 package com.marcelopinotti.radar_financeiro.domain.service;
 
 import com.marcelopinotti.radar_financeiro.domain.exception.ResourceBadRequestException;
-import com.marcelopinotti.radar_financeiro.domain.model.CentroDeCusto;
 import com.marcelopinotti.radar_financeiro.domain.model.Titulo;
 import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import com.marcelopinotti.radar_financeiro.domain.repository.CentroDeCustoRepository;
@@ -10,7 +9,7 @@ import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoRequ
 import com.marcelopinotti.radar_financeiro.dto.centro_de_custo.CentroDeCustoResponseDto;
 import com.marcelopinotti.radar_financeiro.dto.titulo.TituloRequestDto;
 import com.marcelopinotti.radar_financeiro.dto.titulo.TituloResponseDto;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -18,14 +17,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+@RequiredArgsConstructor
 @Service
 public class TituloService implements CRUDService<TituloRequestDto, TituloResponseDto> {
 
-    @Autowired
-    private TituloRepository tituloRepository;
+    private final TituloRepository tituloRepository;
 
-    @Autowired
-    private CentroDeCustoRepository centroDeCustoRepository;
+    private final CentroDeCustoRepository centroDeCustoRepository;
 
     @Override
     public List<TituloResponseDto> obterTodos() {
