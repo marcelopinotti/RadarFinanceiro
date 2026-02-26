@@ -1,6 +1,7 @@
 package com.marcelopinotti.radar_financeiro.domain.repository;
 
 import com.marcelopinotti.radar_financeiro.domain.model.Titulo;
+import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -19,4 +20,6 @@ public interface TituloRepository extends JpaRepository<Titulo, Long> {
             @Param("periodoInicial") Date periodoInicial,
             @Param("periodoFinal") Date periodoFinal
     );
+
+    List<Titulo> findByUsuario(Usuario usuario);
 }

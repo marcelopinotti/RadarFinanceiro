@@ -28,7 +28,10 @@ public class CentroDeCustoService implements CRUDService<CentroDeCustoRequestDto
 
     @Override
     public List<CentroDeCustoResponseDto> obterTodos() {
-        List<CentroDeCusto> lista = centroDeCustoRepository.findAll();
+        Usuario usuario = (Usuario) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        List<CentroDeCusto> lista = centroDeCustoRepository.findByUsuario(usuario);
         return lista.stream()
                 .map(this::toResponseDTO)
                 .toList();
@@ -36,9 +39,14 @@ public class CentroDeCustoService implements CRUDService<CentroDeCustoRequestDto
 
     @Override
     public CentroDeCustoResponseDto buscarPorId(long id) {
-        return centroDeCustoRepository.findById(id)
+        Usuario usuario = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return centroDeCustoRepository.findByUsuario(usuario)
+                .stream()
+                .filter(t -> t.getId() == id)
+                .findFirst()
                 .map(this::toResponseDTO)
-                .orElseThrow(() -> new RuntimeException("Centro de custo não encontrado com id: " + id));
+                .orElseThrow(() -> new RuntimeException("Título não encontrado com id: " + id));
     }
 
     @Override

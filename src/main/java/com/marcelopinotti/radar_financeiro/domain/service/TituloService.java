@@ -27,7 +27,10 @@ public class TituloService implements CRUDService<TituloRequestDto, TituloRespon
 
     @Override
     public List<TituloResponseDto> obterTodos() {
-        List<Titulo> titulos = tituloRepository.findAll();
+        Usuario usuario = (Usuario) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+        List<Titulo> titulos = tituloRepository.findByUsuario(usuario);
         return titulos.stream()
                 .map(this::toResponseDTO)
                 .toList();
@@ -35,7 +38,12 @@ public class TituloService implements CRUDService<TituloRequestDto, TituloRespon
 
     @Override
     public TituloResponseDto buscarPorId(long id) {
-        return tituloRepository.findById(id)
+        Usuario usuario = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return tituloRepository.findByUsuario(usuario)
+                .stream()
+                .filter(t -> t.getId() == id)
+                .findFirst()
                 .map(this::toResponseDTO)
                 .orElseThrow(() -> new RuntimeException("Título não encontrado com id: " + id));
     }
