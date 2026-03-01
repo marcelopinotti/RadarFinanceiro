@@ -27,6 +27,8 @@ O **Radar Financeiro** é uma API REST desenvolvida em Java com Spring Boot para
 | **JWT (jjwt)** | 0.13.0 | Tokens de autenticação |
 | **Lombok** | 1.18.36 | Redução de boilerplate |
 | **ModelMapper** | 3.2.5 | Mapeamento de objetos |
+| **Spring Dotenv** | 4.0.0 | Carregamento de variáveis de ambiente |
+| **Springdoc OpenAPI** | 2.8.16 | Documentação Swagger/OpenAPI |
 | **Maven** | - | Gerenciador de dependências |
 
 ---
@@ -46,7 +48,8 @@ O **Radar Financeiro** é uma API REST desenvolvida em Java com Spring Boot para
 │   ├── 📂 controller/                # Camada de apresentação (REST)
 │   │   ├── UsuarioController.java    # Endpoints de usuário
 │   │   ├── TituloController.java     # Endpoints de títulos
-│   │   └── CentroDeCustoController.java
+│   │   ├── CentroDeCustoController.java
+│   │   └── DashBoardController.java  # Endpoints do dashboard
 │   │
 │   ├── 📂 domain/                    # Camada de domínio
 │   │   ├── 📂 Enum/                  # Enumeradores
@@ -71,7 +74,8 @@ O **Radar Financeiro** é uma API REST desenvolvida em Java com Spring Boot para
 │   │       ├── CRUDService.java      # Interface genérica CRUD
 │   │       ├── UsuarioService.java
 │   │       ├── TituloService.java
-│   │       └── CentroDeCustoService.java
+│   │       ├── CentroDeCustoService.java
+│   │       └── DashboardService.java
 │   │
 │   ├── 📂 dto/                       # Data Transfer Objects (Records)
 │   │   ├── 📂 usuario/
@@ -84,9 +88,12 @@ O **Radar Financeiro** é uma API REST desenvolvida em Java com Spring Boot para
 │   │   │   ├── TituloRequestDto.java
 │   │   │   └── TituloResponseDto.java
 │   │   │
-│   │   └── 📂 centro_de_custo/
-│   │       ├── CentroDeCustoRequestDto.java
-│   │       └── CentroDeCustoResponseDto.java
+│   │   ├── 📂 centro_de_custo/
+│   │   │   ├── CentroDeCustoRequestDto.java
+│   │   │   └── CentroDeCustoResponseDto.java
+│   │   │
+│   │   └── 📂 dashboard/
+│   │       └── DashboardResponseDto.java
 │   │
 │   ├── 📂 handler/                   # Tratamento global de exceções
 │   │   └── RestExceptionHandler.java
@@ -129,10 +136,10 @@ A API utiliza **JWT (JSON Web Token)** para autenticação:
 | Método | Endpoint | Descrição |
 |--------|----------|-----------|
 | `POST` | `/api/usuarios/cadastrar` | Criar usuário |
-| `GET` | `/api/usuarios/obterTodos` | Listar todos |
-| `GET` | `/api/usuarios/{id}` | Buscar por ID |
-| `PATCH` | `/api/usuarios/{id}` | Atualizar |
-| `DELETE` | `/api/usuarios/{id}` | Deletar (soft delete) |
+| `GET` | `/api/usuarios/obter` | Listar todos |
+| `GET` | `/api/usuarios/obter/{id}` | Buscar por ID |
+| `PATCH` | `/api/usuarios/atualizar/{id}` | Atualizar |
+| `DELETE` | `/api/usuarios/deletar/{id}` | Deletar (soft delete) |
 
 ### 🔑 Autenticação
 | Método | Endpoint | Descrição |
@@ -156,6 +163,11 @@ A API utiliza **JWT (JSON Web Token)** para autenticação:
 | `GET` | `/api/centro-de-custo/obter/{id}` | Buscar por ID |
 | `PATCH` | `/api/centro-de-custo/atualizar/{id}` | Atualizar |
 | `DELETE` | `/api/centro-de-custo/deletar/{id}` | Deletar |
+
+### 📈 Dashboard
+| Método | Endpoint | Descrição |
+|--------|----------|-----------|
+| `GET` | `/api/dashboard?periodoInicial=YYYY-MM-DD&periodoFinal=YYYY-MM-DD` | Fluxo de caixa por periodo |
 
 ---
 
@@ -201,17 +213,28 @@ A API estará disponível em `http://localhost:8080`
 ## 📊 Modelo de Dados
 
 ```
-┌─────────────┐       ┌─────────────┐       ┌─────────────────┐
-│   Usuario   │       │   Titulo    │       │  CentroDeCusto  │
-├─────────────┤       ├─────────────┤       ├─────────────────┤
-│ id          │──┐    │ id          │       │ id              │
-│ nome        │  │    │ descricao   │    ┌──│ descricao       │
-│ email       │  │    │ valor       │    │  │ observacao      │
-│ senha       │  └───▶│ tipo        │◀───┘  │ usuario_id      │──┐
-│ celular     │       │ dataVenc.   │       └─────────────────┘  │
-│ dataCadastro│       │ dataPagam.  │                            │
-│ dataInativ. │       │ usuario_id  │◀───────────────────────────┘
-└─────────────┘       └─────────────┘
+┌───────────────┐          ┌──────────────────┐          ┌───────────────────┐
+│    Usuario    │          │      Titulo      │          │   CentroDeCusto   │
+├───────────────┤          ├──────────────────┤          ├───────────────────┤
+│ id_usuario PK │──┐       │ id_titulo    PK  │       ┌──│ idCentroDeCusto PK│
+│ nome          │  │       │ descricao        │       │  │ descricao         │
+│ email (unique)│  │       │ valor            │       │  │ observacao        │
+│ senha         │  ├──────▶│ id_usuario   FK  │       │  │ id_usuario    FK  │
+│ celular       │  │       │ tipo             │       │  └───────────────────┘
+│ dataCadastro  │  │       │ dataVencimento   │       │           │
+│ dataInativacao│  │       │ dataPagamento    │       │           │
+└───────────────┘  │       └──────────────────┘       │           │
+                   │                │                 │           │
+                   │                │                 │           │
+                   │                ▼                 │           │
+                   │       ┌──────────────────┐       │           │
+                   │       │titulo_centro_custo│      │           │
+                   │       ├──────────────────┤       │           │
+                   │       │ id_titulo     FK ─┼──────┘           │
+                   │       │ id_centro_custo FK┼──────────────────┘
+                   │       └──────────────────┘
+                   │
+                   └──────────────────────────────────▶ CentroDeCusto.id_usuario
 ```
 
 ---
@@ -230,12 +253,14 @@ A API estará disponível em `http://localhost:8080`
 - ✅ CRUD completo de Usuários
 - ✅ CRUD completo de Títulos
 - ✅ CRUD completo de Centros de Custo
+- ✅ Dashboard de fluxo de caixa por periodo
 - ✅ Autenticação JWT
 - ✅ Criptografia de senhas (BCrypt)
 - ✅ Soft delete de usuários
 - ✅ Validação de campos obrigatórios
 - ✅ Tratamento global de exceções
 - ✅ DTOs com Java Records
+- ✅ Documentação OpenAPI (Swagger)
 
 ---
 
