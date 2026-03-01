@@ -1,17 +1,9 @@
 package com.marcelopinotti.radar_financeiro.domain.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-public class ApiError {
-    private String timestamp;
-    private int status;
-    private String erro;
-    private String mensagem;
-    private String path;
-}
+public record ApiError(
+    String timestamp,
+    int status,
+    String erro,
+    String mensagem,
+    String path
+) {}

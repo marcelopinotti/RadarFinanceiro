@@ -4,6 +4,7 @@ import com.marcelopinotti.radar_financeiro.domain.model.Usuario;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -13,16 +14,14 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
+@Slf4j
 @Component
 public class JwtUtil {
     @Value("${auth.jwt.secret}")
     private String jwtSecret;
     @Value("${auth.jwt-expiration}")
     private Long jwtExpirationMs;
-    private static final Logger logger = Logger.getLogger(JwtUtil.class.getName());
 
     public String gerarToken(Authentication authentication) {
         Date dataExpircao = new Date(new Date().getTime() + jwtExpirationMs);
@@ -38,7 +37,7 @@ public class JwtUtil {
                     .signWith(secretKey)
                     .compact();
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Erro ao gerar token JWT", e);
+            log.warn("Erro ao gerar token JWT", e);
             return "";
         }
     }
@@ -54,7 +53,7 @@ public class JwtUtil {
                     .getPayload();
 
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Erro ao obter claims do token JWT", e);
+            log.warn("Erro ao obter claims do token JWT", e);
             return null;
         }
     }
